@@ -118,8 +118,8 @@
 
 ```bash
 # 1. 克隆项目
-git clone https://github.com/mangowillknow-cyber/a-share-fundamental-analysis.git
-cd a-share-fundamental-analysis
+git clone https://github.com/mangowillknow-cyber/china-a-share-fundamental-analysis.git
+cd china-a-share-fundamental-analysis
 
 # 2. 创建虚拟环境（推荐）
 python -m venv venv
