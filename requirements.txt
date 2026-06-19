@@ -1,0 +1,21 @@
+# A股基本面分析作品集 - Python依赖清单
+# 安装命令: pip install -r requirements.txt
+
+# 数据处理
+numpy>=1.24
+pandas>=2.0
+
+# 统计分析
+scipy>=1.10
+scikit-learn>=1.3
+statsmodels>=0.14
+
+# 可视化
+plotly>=5.15
+dash>=2.14
+matplotlib>=3.7
+seaborn>=0.12
+
+# 开发环境
+jupyter>=1.0
+notebook>=7.0
