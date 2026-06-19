@@ -810,14 +810,16 @@ def main():
     report = generate_data_quality_report(df_wide_original, df, None)
 
     # 保存清洗后的数据到CSV
-    output_path = 'E:/Programming/Claude/A股基本面分析作品集/cleaned_financial_data.csv'
+    import os as _os
+_output_dir = _os.path.dirname(_os.path.abspath(__file__))
+    output_path = _os.path.join(_output_dir, 'cleaned_financial_data.csv')
     df.to_csv(output_path, index=False, encoding='utf-8-sig')
     print(f"\n  清洗后数据已保存至：{output_path}")
     print(f"  最终数据形状：{df.shape[0]} 行 × {df.shape[1]} 列")
 
     # 保存数据质量报告为CSV
     report_df = pd.DataFrame([report])
-    report_path = 'E:/Programming/Claude/A股基本面分析作品集/data_quality_summary.csv'
+    report_path = _os.path.join(_output_dir, 'data_quality_summary.csv')
     report_df.to_csv(report_path, index=False, encoding='utf-8-sig')
     print(f"  数据质量报告已保存至：{report_path}")
 

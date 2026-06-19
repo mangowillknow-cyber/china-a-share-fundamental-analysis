@@ -321,7 +321,9 @@ def save_results(ttest_result, d, interp, robustness_results):
             '效应解释': r.get('效应解释', ''),
         })
     df_results = pd.DataFrame(rows)
-    df_results.to_csv('E:/Programming/Claude/A股基本面分析作品集/统计检验结果表.csv', index=False, encoding='utf-8-sig')
+import os as _os
+_output_dir = _os.path.dirname(_os.path.abspath(__file__))
+    df_results.to_csv(_os.path.join(_output_dir, '统计检验结果表.csv'), index=False, encoding='utf-8-sig')
     print("\n【结果已保存】统计检验结果表.csv")
     print(df_results.to_string(index=False))
     return df_results
