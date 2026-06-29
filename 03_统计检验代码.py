@@ -8,10 +8,26 @@ AB测试思维：研发投入对ROE的影响检验
 
 import numpy as np
 import pandas as pd
+import os
 from scipy import stats
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
+
+# ======================== 数据读取（优先读模块一CSV） ========================
+
+def load_or_generate_data():
+    """读取模块一的清洗后数据，若不存在则自动生成"""
+    csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cleaned_financial_data.csv')
+    if os.path.exists(csv_path):
+        df = pd.read_csv(csv_path, encoding='utf-8-sig')
+        if '会计年度' in df.columns and '年份' not in df.columns:
+            df = df.rename(columns={'会计年度': '年份'})
+        if '归母净利润' in df.columns and '归属于母公司股东的净利润' not in df.columns:
+            df = df.rename(columns={'归母净利润': '归属于母公司股东的净利润'})
+        return df
+    return None
+
 
 # ======================== 数据生成（与模块一/二一致） ========================
 
@@ -321,9 +337,7 @@ def save_results(ttest_result, d, interp, robustness_results):
             '效应解释': r.get('效应解释', ''),
         })
     df_results = pd.DataFrame(rows)
-import os as _os
-_output_dir = _os.path.dirname(_os.path.abspath(__file__))
-    df_results.to_csv(_os.path.join(_output_dir, '统计检验结果表.csv'), index=False, encoding='utf-8-sig')
+    df_results.to_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '统计检验结果表.csv'), index=False, encoding='utf-8-sig')
     print("\n【结果已保存】统计检验结果表.csv")
     print(df_results.to_string(index=False))
     return df_results
@@ -364,9 +378,14 @@ if __name__ == '__main__':
     print("AB测试：研发投入对ROE的影响检验")
     print("=" * 70)
 
-    # 1. 生成数据
-    df = generate_all_data()
-    print(f"原始数据维度: {df.shape}")
+    # 1. 优先读取模块一清洗后数据，否则自生成
+    df = load_or_generate_data()
+    if df is not None:
+        print(f"  已读取模块一清洗后数据: {df.shape}")
+    else:
+        print("  模块一CSV不存在，自动生成数据...")
+        df = generate_all_data()
+    print(f"数据维度: {df.shape}")
 
     # 2. 计算财务指标
     df = compute_ratios(df)

@@ -13,7 +13,24 @@ import plotly.express as px
 import plotly.graph_objects as go
 from dash import Dash, html, dcc, Input, Output
 
-# ======================== 第一部分：数据生成（自包含，与模块一一致） ========================
+# ======================== 第一部分：数据读取（优先读模块一CSV，否则自生成） ========================
+
+def load_or_generate_data():
+    """读取模块一的清洗后数据（cleaned_financial_data.csv），
+    若文件不存在则自动生成"""
+    import os
+    csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cleaned_financial_data.csv')
+    if os.path.exists(csv_path):
+        df = pd.read_csv(csv_path, encoding='utf-8-sig')
+        # 统一列名（模块一用"会计年度"，本模块用"年份"）
+        if '会计年度' in df.columns and '年份' not in df.columns:
+            df = df.rename(columns={'会计年度': '年份'})
+        # 统一列名（模块一用"归母净利润"，本模块用"归属于母公司股东的净利润"）
+        if '归母净利润' in df.columns and '归属于母公司股东的净利润' not in df.columns:
+            df = df.rename(columns={'归母净利润': '归属于母公司股东的净利润'})
+        return df
+    return None
+
 
 def generate_all_data():
     """生成模拟数据（复用模块一的种子和逻辑，确保一致性）"""
@@ -456,15 +473,18 @@ if __name__ == '__main__':
     print("A股上市公司财务指标计算 + 交互式仪表板")
     print("=" * 70)
 
-    # 1. 生成数据
-    rng = np.random.default_rng(seed=2024)
-    df_income, df_balance, df_cash = generate_all_data()
-    df_income, df_balance, df_cash = inject_quality_issues(df_income, df_balance, df_cash, rng)
+    # 1. 优先读取模块一的清洗后数据，不存在则自生成
+    df_cleaned = load_or_generate_data()
+    if df_cleaned is not None:
+        print(f"  已读取模块一清洗后数据: {df_cleaned.shape}")
+    else:
+        print("  模块一CSV不存在，自动生成数据...")
+        rng = np.random.default_rng(seed=2024)
+        df_income, df_balance, df_cash = generate_all_data()
+        df_income, df_balance, df_cash = inject_quality_issues(df_income, df_balance, df_cash, rng)
+        df_cleaned = clean_data(df_income, df_balance, df_cash)
 
-    # 2. 清洗数据
-    df_cleaned = clean_data(df_income, df_balance, df_cash)
-
-    # 3. 计算财务指标
+    # 2. 计算财务指标
     df_ratios = compute_financial_ratios(df_cleaned)
 
     # 4. 输出清洗后数据概览

@@ -17,6 +17,7 @@ A股基本面分析作品集 - 模块一：数据获取与清洗工程
 import numpy as np
 import pandas as pd
 import sys
+import os
 import io
 import warnings
 warnings.filterwarnings('ignore')
@@ -806,20 +807,24 @@ def main():
     # 第6步：缩尾处理
     df = step6_winsorize(df)
 
+    # 第7步：修复会计恒等式（缩尾会破坏 资产 = 负债 + 权益）
+    if '资产总计' in df.columns and '负债合计' in df.columns and '所有者权益合计' in df.columns:
+        df['所有者权益合计'] = df['资产总计'] - df['负债合计']
+        print("\n【第7步：修复会计恒等式】")
+        print(f"  已重算 所有者权益合计 = 资产总计 - 负债合计，最大偏差已修正为0")
+
     # 第三部分：生成数据质量报告
     report = generate_data_quality_report(df_wide_original, df, None)
 
     # 保存清洗后的数据到CSV
-    import os as _os
-_output_dir = _os.path.dirname(_os.path.abspath(__file__))
-    output_path = _os.path.join(_output_dir, 'cleaned_financial_data.csv')
+    output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cleaned_financial_data.csv')
     df.to_csv(output_path, index=False, encoding='utf-8-sig')
     print(f"\n  清洗后数据已保存至：{output_path}")
     print(f"  最终数据形状：{df.shape[0]} 行 × {df.shape[1]} 列")
 
     # 保存数据质量报告为CSV
     report_df = pd.DataFrame([report])
-    report_path = _os.path.join(_output_dir, 'data_quality_summary.csv')
+    report_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data_quality_summary.csv')
     report_df.to_csv(report_path, index=False, encoding='utf-8-sig')
     print(f"  数据质量报告已保存至：{report_path}")
 
